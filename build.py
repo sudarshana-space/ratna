@@ -133,6 +133,12 @@ def page(title, body, current):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{title}｜Ratna・瑯納</title>
 <meta name="description" content="Ratna・瑯納 行動應用程式{title}">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<meta name="theme-color" content="#1d3b54">
 <style>{CSS}</style>
 </head>
 <body>
