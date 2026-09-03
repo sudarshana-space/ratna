@@ -39,12 +39,38 @@ footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--rule);color:v
 """
 
 def inline(t):
+    """行內語法轉換。
+
+    已產生的 <a> 會先換成預留位置，避免後續的裸網址／email 正則
+    再去掃它的 href 屬性而產生巢狀錨點。
+    """
     t = html.escape(t)
-    t = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', t)
+    slots = []
+
+    def stash(markup):
+        slots.append(markup)
+        return "\x00{}\x00".format(len(slots) - 1)
+
+    # markdown 連結 [文字](網址)
+    t = re.sub(
+        r"\[([^\]]+)\]\(([^)]+)\)",
+        lambda m: stash('<a href="{}">{}</a>'.format(m.group(2), m.group(1))),
+        t,
+    )
     t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
-    t = re.sub(r"(?<![\w@.-])((?:https?://)[^\s<）,，。]+)", r'<a href="\1">\1</a>', t)
-    t = re.sub(r"(?<![\w<\"/])([\w.+-]+@[\w-]+\.[\w.-]+)", r'<a href="mailto:\1">\1</a>', t)
-    return t
+    # 裸網址
+    t = re.sub(
+        r"(?<![\w@.\-/])(https?://[^\s<）,，。、]+)",
+        lambda m: stash('<a href="{}">{}</a>'.format(m.group(1), m.group(1))),
+        t,
+    )
+    # 裸 email
+    t = re.sub(
+        r"(?<![\w.\-/@])([\w.+-]+@[\w-]+\.[\w.-]+[\w])",
+        lambda m: stash('<a href="mailto:{}">{}</a>'.format(m.group(1), m.group(1))),
+        t,
+    )
+    return re.sub(r"\x00(\d+)\x00", lambda m: slots[int(m.group(1))], t)
 
 def row(line):
     return [c.strip() for c in line.strip().strip("|").split("|")]
