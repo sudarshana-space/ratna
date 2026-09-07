@@ -2,6 +2,7 @@
 """把 src/*.md 轉成 GitHub Pages 用的靜態 HTML。"""
 import html
 import re
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -175,6 +176,39 @@ def page(title, body, current, head_title=None, description=None, url=None):
 </html>
 """
 
+def write_sitemap(pages):
+    """依實際產出的檔案寫 sitemap.xml 與 robots.txt。
+
+    lastmod 取檔案的修改時間，所以只有真的重建過的頁面日期才會前進。
+    """
+    rows = []
+    for name in pages:
+        f = ROOT / name
+        loc = SITE + "/" + ("" if name == "index.html" else name)
+        lastmod = datetime.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d")
+        rows.append(
+            "  <url>\n"
+            "    <loc>{}</loc>\n"
+            "    <lastmod>{}</lastmod>\n"
+            "  </url>".format(loc, lastmod)
+        )
+
+    (ROOT / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(rows)
+        + "\n</urlset>\n",
+        encoding="utf-8",
+    )
+    print("built sitemap.xml")
+
+    (ROOT / "robots.txt").write_text(
+        "User-agent: *\nAllow: /\n\nSitemap: {}/sitemap.xml\n".format(SITE),
+        encoding="utf-8",
+    )
+    print("built robots.txt")
+
+
 def main():
     for src, dest, title in PAGES:
         md = (SRC / src).read_text(encoding="utf-8")
@@ -208,5 +242,7 @@ def main():
         encoding="utf-8",
     )
     print("built index.html")
+
+    write_sitemap(["index.html"] + [dest for _, dest, _ in PAGES])
 
 main()
