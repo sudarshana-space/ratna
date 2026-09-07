@@ -6,6 +6,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 SRC = ROOT / "src"
+SITE = "https://ratna.tw"
+
+INDEX_TITLE = "Ratna・瑯納｜雲川水月礦石旗艦系列"
+INDEX_DESC = (
+    "Ratna 是梵文「珍寶」，音譯作瑯納——雲川水月打造的礦石旗艦系列。"
+    "依循印度占星的生命藍圖，在對的時候做對的選擇，再以礦石的能量自我祝福；"
+    "每一條礦石手鍊，都搭配 Ratna App。"
+)
 
 PAGES = [
     ("privacy.md", "privacy.html", "隱私權政策"),
@@ -120,7 +128,10 @@ def convert(md):
         i += 1
     return "\n".join(out)
 
-def page(title, body, current):
+def page(title, body, current, head_title=None, description=None, url=None):
+    head_title = head_title or f"{title}｜Ratna・瑯納"
+    description = description or f"Ratna・瑯納 行動應用程式{title}"
+    url = url or f"{SITE}/{current}"
     parts = []
     for _, h, t in PAGES:
         cls = ' class="on"' if h == current else ''
@@ -131,8 +142,21 @@ def page(title, body, current):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{title}｜Ratna・瑯納</title>
-<meta name="description" content="Ratna・瑯納 行動應用程式{title}">
+<title>{head_title}</title>
+<meta name="description" content="{description}">
+<link rel="canonical" href="{url}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ratna・瑯納">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:title" content="{head_title}">
+<meta property="og:description" content="{description}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{SITE}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ratna・瑯納　雲川水月礦石旗艦系列">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{SITE}/og.png">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -161,13 +185,28 @@ def main():
         print("built", dest)
 
     index = """<h1>Ratna・瑯納</h1>
-<p class="meta">典鴻國際股份有限公司　法律文件</p>
+<p class="meta">典鴻國際股份有限公司</p>
+<p>Ratna 是梵文，意為「珍寶」；音譯作「瑯納」——瑯，是純淨；納，是收藏天地的精華。</p>
+<p>「Ratna・瑯納」是雲川水月所打造的礦石旗艦系列；雲川水月，是華人世界最具影響力的全方位個人療癒體驗品牌。</p>
+<p>我們依循印度占星的世界觀：古印度的聖者相信，天上星辰的運行，正是每個人身、心、靈的生命藍圖。讀懂自己的藍圖，在對的時候做對的選擇，再以礦石的能量自我祝福——路，就會走得順一些。</p>
+<p>每一條礦石手鍊，都搭配 Ratna App。它陪著你，在生命的每一刻，找到自己的節奏，安下心來，慢慢把自己填滿。</p>
+<h2>法律文件</h2>
 <ul>
 <li><a href="privacy.html">隱私權政策</a>（v1.2｜生效日 2026年9月1日）</li>
 <li><a href="terms.html">服務條款</a>（v1.2｜生效日 2026年9月1日）</li>
 </ul>
 <p>如有任何疑問，請來信 info.dh.tw@gmail.com。</p>"""
-    (ROOT / "index.html").write_text(page("法律文件", index, "index.html"), encoding="utf-8")
+    (ROOT / "index.html").write_text(
+        page(
+            "法律文件",
+            index,
+            "index.html",
+            head_title=INDEX_TITLE,
+            description=INDEX_DESC,
+            url=SITE + "/",
+        ),
+        encoding="utf-8",
+    )
     print("built index.html")
 
 main()
